@@ -9,6 +9,22 @@ trainLabels <- trainLabels[order(trainLabels$id),]
 status_group <- trainLabels$status_group
 
 trainDataset <- cbind(trainData, status_group)
+
+# Removing meaningless columns
+trainDataset$num_private <- NULL
+trainDataset$wpt_name <- NULL
+trainDataset$recorded_by <- NULL
+trainDataset$date_recorded <- NULL
+trainDataset$funder <- NULL
+trainDataset$installer <- NULL
+
+identical(trainDataset$quantity, trainDataset$quantity_group)
+trainDataset$quantity_group <- NULL
+
+# Removing meaningless rows
+trainDataset <- trainDataset[trainDataset$construction_year != 0,]
+trainDataset <- trainDataset[trainDataset$amount_tsh != 0,]
+
 View(trainDataset)
 
 
