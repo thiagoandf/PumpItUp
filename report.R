@@ -1,5 +1,3 @@
-# Pump it Up
-
 trainData <- read.csv("data/Training set values - 4910797b-ee55-40a7-8668-10efd5c1b960.csv", sep=",")
 trainData <- trainData[order(trainData$id),]
 
@@ -22,6 +20,11 @@ trainDataset$payment <- NULL # same as payment_type
 trainDataset$public_meeting <- NULL # unclear meaning
 trainDataset$scheme_management <- NULL
 
+# Factors bigger than 53
+trainDataset$subvillage <- NULL
+trainDataset$lga <- NULL
+trainDataset$ward <- NULL
+
 identical(trainDataset$quantity, trainDataset$quantity_group)
 trainDataset$quantity_group <- NULL
 
@@ -36,9 +39,13 @@ trainDataset <- trainDataset[trainDataset$amount_tsh != 0,]
 trainDataset <- trainDataset[trainDataset$permit != "",]
 trainDataset <- trainDataset[trainDataset$population > 1,]
 
-View(trainDataset)
+# View(trainDataset)
 
 testData <- read.csv("data/Test set values  - 702ddfc5-68cd-4d1d-a0de-f5f566f76d91.csv", sep=",")
+submissionFormat <- read.csv("data/SubmissionFormat.csv", sep=",")
+
+status_group <- submissionFormat$status_group
+testData <- cbind(testData, status_group)
 
 # Removing meaningless columns
 testData$num_private <- NULL
@@ -52,6 +59,12 @@ testData$payment <- NULL
 testData$public_meeting <- NULL
 testData$scheme_management <- NULL
 
+# Factors bigger than 53
+testData$subvillage <- NULL
+testData$lga <- NULL
+testData$ward <- NULL
+
+
 testData$quantity_group <- NULL
 
 # Removing meaningless rows
@@ -60,5 +73,17 @@ testData <- testData[testData$amount_tsh != 0,]
 testData <- testData[testData$permit != "",]
 testData <- testData[testData$population > 1,]
 
-submissionFormat <- read.csv("data/SubmissionFormat.csv", sep=",")
-submissionFormat
+
+library(randomForest)
+# small trick nao sei o que faz
+testData <- rbind(trainDataset[1, ] , testData)
+testData <- testData[-1,]
+formula <- status_group ~ .
+model <- randomForest(formula, data = trainDataset)
+prediction <- predict(model, newdata = testData)
+
+submissionFormat <- data.frame(testData$id, prediction)
+View(submissionFormat)
+
+write.csv(submissionFormat, "Submission.csv")
+
