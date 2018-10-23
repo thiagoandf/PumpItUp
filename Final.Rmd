@@ -1,0 +1,42 @@
+---
+title: "Final"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Análise da Base
+
+Iniciamos nossa análise fazendo uma análise manual prévia da base. Nela, usamos a explicação dos atributos presentes no site do desafio [Pump it Up: Descrição dos Atributos do Dataset](https://www.drivendata.org/competitions/7/pump-it-up-data-mining-the-water-table/page/25/). A partir disso, conseguimos determinar quais seriam os atributos mais importantes para nossa análise e já eliminar alguns deles.
+
+```{r}
+trainDataset$wpt_name <- NULL
+trainDataset$recorded_by <- NULL
+trainDataset$funder <- NULL
+trainDataset$installer <- NULL
+trainDataset$scheme_name <- NULL
+trainDataset$payment <- NULL
+trainDataset$public_meeting <- NULL
+```
+
+O próximo passo foi analisar os dados do Dataset em si. A partir disso, conseguimos determinar que vários deles estavam zerados ou com dados inconsistentes e já conseguimos excluir-los.
+
+```{r}
+trainDataset$date_recorded <- NULL
+trainDataset$num_private <- NULL
+trainDataset$scheme_management <- NULL
+```
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
