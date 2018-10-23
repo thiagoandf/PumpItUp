@@ -1,13 +1,31 @@
 ---
 title: "Final"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Análise da Base
+## Carregamento da Base
+
+O primeiro passo para iniciar a análise foi carregar as duas bases e salvar certos atributos como variáveis separadas. Isso nos permitiu preparar o chão para facilitar a análise mais para frente.
+
+```{r}
+trainData <- read.csv("data/Training set values - 4910797b-ee55-40a7-8668-10efd5c1b960.csv", sep=",")
+trainData <- trainData[order(trainData$id),]
+
+trainLabels <- read.csv("data/Training set labels - 0bf8bc6e-30d0-4c50-956a-603fc693d966.csv", sep=",")
+trainLabels <- trainLabels[order(trainLabels$id),]
+
+status_group <- trainLabels$status_group
+
+trainDataset <- cbind(trainData, status_group)
+```
+
+## Preparação Inicial da Base
 
 Iniciamos nossa análise fazendo uma análise manual prévia da base. Nela, usamos a explicação dos atributos presentes no site do desafio [Pump it Up: Descrição dos Atributos do Dataset](https://www.drivendata.org/competitions/7/pump-it-up-data-mining-the-water-table/page/25/). A partir disso, conseguimos determinar quais seriam os atributos mais importantes para nossa análise e já eliminar alguns deles.
 
@@ -29,14 +47,93 @@ trainDataset$num_private <- NULL
 trainDataset$scheme_management <- NULL
 ```
 
+Por último, excluímos atributos que continham muitos fatores diferentes e não conseguiriam ser levados em conta na análise, e um dos atributos que era idêntico à outro.
 
+```{r}
+trainDataset$subvillage <- NULL
+trainDataset$lga <- NULL
+trainDataset$ward <- NULL
 
-## Including Plots
+identical(trainDataset$quantity, trainDataset$quantity_group) # Nos mostra se os dois atributos são idênticos
+trainDataset$quantity_group <- NULL
+``` 
 
-You can also embed plots, for example:
+Reconhecemos que, dentre os atributos excluídos, estavam alguns que poderiam ser relevantes, tal como a data da coleta do dado. No entanto, acreditamos que eles estariam mais presentes em análises mais completas da base, por isso continuamos com a decisão de os excluir.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Fizemos também uma exclusão de algumas linhas ccom atributos importantes que estavam zerados ou com dados esdruxulos. No entanto, desistimos de continuar com isso, visto que, para submeter uma base para o desafio, ela necessita conter o mesmo número de linhas da base original.
+
+```{r}
+#trainDataset <- trainDataset[trainDataset$construction_year != 0,]
+#trainDataset <- trainDataset[trainDataset$amount_tsh != 0,]
+#trainDataset <- trainDataset[trainDataset$permit != "",]
+#trainDataset <- trainDataset[trainDataset$population > 1,]
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Test Dataset
+
+Após a preparação da base de treinamento, repetimos os mesmos passos para a base de testes.
+
+```{r}
+testData <- read.csv("data/Test set values  - 702ddfc5-68cd-4d1d-a0de-f5f566f76d91.csv", sep=",")
+submissionFormat <- read.csv("data/SubmissionFormat.csv", sep=",")
+
+status_group <- submissionFormat$status_group
+testData <- cbind(testData, status_group)
+
+# Removing meaningless columns
+testData$num_private <- NULL
+testData$wpt_name <- NULL
+testData$recorded_by <- NULL
+testData$date_recorded <- NULL
+testData$funder <- NULL
+testData$installer <- NULL
+testData$scheme_name <- NULL
+testData$payment <- NULL
+testData$public_meeting <- NULL
+testData$scheme_management <- NULL
+
+# Factors bigger than 53
+testData$subvillage <- NULL
+testData$lga <- NULL
+testData$ward <- NULL
+
+testData$quantity_group <- NULL
+
+# Removing meaningless rows
+#testData <- testData[testData$construction_year != 0,]
+#testData <- testData[testData$amount_tsh != 0,]
+#testData <- testData[testData$permit != "",]
+#testData <- testData[testData$population > 1,]
+```
+
+## Treinamento e Resultados Iniciais
+
+Decidimos por usar, inicialmente, a biblioteca RandomForest por ser a bibilioteca que o grupo conhecia melhor e por ela ter um bom tratamento de variáveis mistas (muito presentes no Dataset).
+
+Realizamos um pré tratamento dos dados para funcionar com a biblioteca corretamente. Para isso, usamos referências encontradas nos exercícios feitos em aula e na internet.
+
+```{r}
+library(randomForest)
+testData <- rbind(trainDataset[1, ] , testData)
+testData <- testData[-1,]
+formula <- status_group ~ .
+```
+
+Depois do tratamento dos dados, criamos o modelo e a predição inicial.
+
+```{r}
+model <- randomForest(formula, data = trainDataset)
+prediction <- predict(model, newdata = testData)
+```
+
+Por último, exportamos os resultados obtidos...
+
+```{r}
+submissionFormat <- data.frame(testData$id, prediction)
+```
+
+... e relizamos o envio no site do desafio.
+
+<img src="Submission#1.png" />
+
+
