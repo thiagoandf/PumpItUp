@@ -54,9 +54,9 @@ testData <- rbind(trainDataset[1, ] , testData)
 testData <- testData[-1,]
 
 
-ntree <- c(500,700,1000)
-mtry <- c(2,9,15)
-nodesize <- c(1)
+ntree <- c(500,700)
+mtry <- c(5,9,12)
+nodesize <- c(1, 3)
 #maxnodes <- c(10,100,NA)
 
 formula <- status_group ~ .
@@ -74,10 +74,11 @@ names(result) <- c('mtry','ntree','nodesize','oob')
 View(result)
 
 #
-# A configuracao com o menor OOB foi mtry = 9, ntree = 500, nodesize = 1
+# A configuracao com o menor OOB foi mtry = 5, ntree = 700, nodesize = 3
+# OOB = 16,63%
 # criando modelo com esta configuração:
 
-model <- randomForest(myFormula, data=train, do.trace=100, mtry = 9, ntree=500, nodesize=1)
+model <- randomForest(myFormula, data=train, do.trace=100, mtry = 5, ntree=700, nodesize=3)
 plot(model)
 pred <- predict(model, newdata = testData)
 confusionMatrix(table(pred,test$Y))
