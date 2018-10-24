@@ -14,9 +14,17 @@ cleanData <- function(dataset, training = FALSE){
   
   # Meaningless columns
   dataset <- dataset[ , -which(names(dataset) %in% 
-                                 c('id','num_private', 'wpt_name', 'recorded_by', 'date_recorded', 
-                                   'funder', 'installer', 'scheme_name', 'public_meeting', 
-                                   'scheme_management'))]
+                                 c('id',
+                                   'num_private', 
+                                   'wpt_name', 
+                                   'recorded_by', 
+                                   'date_recorded', 
+                                   'funder',
+                                   'installer',
+                                   'scheme_name',
+                                   'public_meeting', 
+                                   'scheme_management'
+                                   ))]
   
   # More than 53 factors
   dataset <- dataset[ , -which(names(dataset) %in% c('subvillage','lga','ward'))]
@@ -26,18 +34,23 @@ cleanData <- function(dataset, training = FALSE){
   
   # Removing columns that mean the same thing
   dataset <- dataset[ , -which(names(dataset) %in% 
-                                 c('region_code', 'source_type', 'source_class',
-                                   'waterpoint_type_group', 'extraction_type_group',
-                                   'extraction_type_class', 'management_group',
-                                   'quality_group'))] # region_code means the same as region
+                                 c('region_code', 
+                                   #'source_type',
+                                   'source_class',
+                                   'waterpoint_type_group',
+                                   'extraction_type_group',
+                                   'extraction_type_class', 
+                                   'management_group'
+                                   #'quality_group'
+                                   ))] # region_code means the same as region
   
   # There are many related fields, but the level of specificity required will be determined as we test
   # different algorithms
   if(training == TRUE) {
     # Removing meaningless rows
-    dataset <- dataset[dataset$construction_year != 0,]
-    dataset <- dataset[dataset$amount_tsh != 0,]
-    dataset <- dataset[dataset$permit != '',]
+    #dataset <- dataset[dataset$construction_year != 0,]
+    #dataset <- dataset[dataset$amount_tsh != 0,]
+    #dataset <- dataset[dataset$permit != '',]
     dataset <- dataset[dataset$population > 1,]
     dataset <- dataset[complete.cases(dataset), ]
   }
@@ -77,7 +90,8 @@ View(result)
 # OOB = 16,63%
 # criando modelo com esta configuração:
 
-model <- randomForest(formula, data=trainDataset, do.trace=100, mtry = 5, ntree=700, nodesize=3)
+# model <- randomForest(formula, data=trainDataset, do.trace=100, mtry = 5, ntree=500, nodesize=5)
+model <- randomForest(formula, data=trainDataset, do.trace=100, mtry = 3, ntree=800, nodesize=2)
 pred <- predict(model, newdata = testData)
 
 plot(model)
