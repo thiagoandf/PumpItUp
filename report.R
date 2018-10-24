@@ -49,14 +49,13 @@ testData <- cleanData(testData)
 
 
 library(randomForest)
-# small trick nao sei o que faz
 testData <- rbind(trainDataset[1, ] , testData)
 testData <- testData[-1,]
 
 
-ntree <- c(500,700)
+ntree <- c(500,1000, 1200)
 mtry <- c(5,9,12)
-nodesize <- c(1, 3)
+nodesize <- c(3, 5, 7)
 #maxnodes <- c(10,100,NA)
 
 formula <- status_group ~ .
@@ -78,11 +77,11 @@ View(result)
 # OOB = 16,63%
 # criando modelo com esta configuração:
 
-model <- randomForest(myFormula, data=train, do.trace=100, mtry = 5, ntree=700, nodesize=3)
-plot(model)
+model <- randomForest(formula, data=trainDataset, do.trace=100, mtry = 5, ntree=700, nodesize=3)
 pred <- predict(model, newdata = testData)
-confusionMatrix(table(pred,test$Y))
 
-submissionFormat <- data.frame(testData$id, pred)
-write.csv(submissionFormat, "Submission.csv")
+plot(model)
+
+submissionFormat$status_group <- pred
+write.csv(submissionFormat, "Submission.csv", row.names = FALSE)
 
